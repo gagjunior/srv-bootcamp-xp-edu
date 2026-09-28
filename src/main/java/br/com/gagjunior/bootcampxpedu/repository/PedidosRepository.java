@@ -4,11 +4,15 @@ import br.com.gagjunior.bootcampxpedu.model.Pedidos;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository de persistência de pedidos.
  */
 public interface PedidosRepository extends MongoRepository<Pedidos, String> {
+
+    @Override
+    Optional<Pedidos> findById(String id);
 
     List<Pedidos> findByClienteId(String clienteId);
 
