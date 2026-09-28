@@ -1,3 +1,12 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: bootcamp-xp-edu
+  mongodb:
+    uri: ${SPRING_MONGODB_URI:mongodb://admin:admin@localhost:27017/bootcamp-xpeducacao?tls=false}
+    database: ${SPRING_MONGODB_DATABASE:bootcamp-xpeducacao}
+  data:
+    mongodb:
+      auto-index-creation: true
