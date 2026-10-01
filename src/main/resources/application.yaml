@@ -6,7 +6,7 @@ spring:
     name: bootcamp-xp-edu
   mongodb:
     uri: ${ENV_MONGO_DB_URI}
-    database: bootcamp-xpeducacao
+    database: ${ENV_MONGO_DB_DATABASE}
   data:
     mongodb:
       auto-index-creation: true
