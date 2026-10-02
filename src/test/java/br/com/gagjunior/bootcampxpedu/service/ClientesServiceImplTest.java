@@ -222,7 +222,7 @@ class ClientesServiceImplTest {
         when(clientesRepository.findByEmail("ana@example.com")).thenReturn(Optional.of(existing));
         when(clientesRepository.save(any(Clientes.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        assertThat(service.update("1", client(null, "123"))).isEqualTo(client("1", "Ana", "123", "ana@example.com"));
+        assertThat(service.update("1", client(null, "123"))).isEqualTo(client("1", "123", "ana@example.com"));
     }
 
     @Test
@@ -296,10 +296,10 @@ class ClientesServiceImplTest {
     }
 
     private static Clientes client(String id, String cpf) {
-        return client(id, "Ana", cpf, "ana@example.com");
+        return client(id, cpf, "ana@example.com");
     }
 
-    private static Clientes client(String id, String name, String cpf, String email) {
-        return new Clientes(id, name, cpf, email);
+    private static Clientes client(String id, String cpf, String email) {
+        return new Clientes(id, "Ana", cpf, email);
     }
 }

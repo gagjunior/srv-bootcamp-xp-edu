@@ -18,7 +18,11 @@
         <license/>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>gagjunior</id>
+            <name>Gilberto Araujo Gomes Junior</name>
+            <email>gagjunior@hotmail.com</email>
+        </developer>
     </developers>
     <scm>
         <connection/>
