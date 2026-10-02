@@ -1,10 +1,8 @@
-package br.com.gagjunior.bootcampxpedu.controller;
+package br.com.gagjunior.bootcampxpedu.controller.api.v1;
 
 import br.com.gagjunior.bootcampxpedu.dto.ApiErrorResponse;
 import br.com.gagjunior.bootcampxpedu.dto.ClienteRequest;
 import br.com.gagjunior.bootcampxpedu.dto.ClienteResponse;
-import br.com.gagjunior.bootcampxpedu.model.Clientes;
-import br.com.gagjunior.bootcampxpedu.service.ClientesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -17,21 +15,13 @@ import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
 
-@RestController
+
 @RequestMapping("/api/v1/clientes")
 @Tag(name = "Clientes", description = "Operações de cadastro e consulta de clientes.")
-public class ClientesController {
-
-    private final ClientesService clientesService;
-
-    public ClientesController(ClientesService clientesService) {
-        this.clientesService = clientesService;
-    }
+public interface ClientesSwagger {
 
     @GetMapping
     @Operation(summary = "Lista clientes", description = "Lista todos os clientes ou consulta por CPF ou e-mail. Apenas um filtro pode ser informado por vez.")
@@ -41,25 +31,12 @@ public class ClientesController {
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado para o filtro informado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<List<ClienteResponse>> findAll(
+    ResponseEntity<List<ClienteResponse>> findAll(
             @Parameter(description = "CPF para consulta exata", example = "12345678900")
             @RequestParam(value = "cpf", required = false) String cpf,
             @Parameter(description = "E-mail para consulta exata", example = "ana.silva@example.com")
             @RequestParam(value = "email", required = false) String email
-    ) {
-        if (cpf != null && email != null) {
-            throw new IllegalArgumentException("informe apenas um dos filtros: cpf ou email");
-        }
-
-        if (cpf != null) {
-            return ResponseEntity.ok(List.of(ClienteResponse.from(clientesService.findByCpf(cpf))));
-        }
-        if (email != null) {
-            return ResponseEntity.ok(List.of(ClienteResponse.from(clientesService.findByEmail(email))));
-        }
-
-        return ResponseEntity.ok(clientesService.findAll().stream().map(ClienteResponse::from).toList());
-    }
+    );
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca cliente por ID")
@@ -69,12 +46,10 @@ public class ClientesController {
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<ClienteResponse> findById(
+    ResponseEntity<ClienteResponse> findById(
             @Parameter(description = "Identificador do cliente", example = "65f1a2b3c4d5e6f789012345", required = true)
             @PathVariable("id") String id
-    ) {
-        return ResponseEntity.ok(ClienteResponse.from(clientesService.findById(id)));
-    }
+    );
 
     @GetMapping("/cpf/{cpf}")
     @Operation(summary = "Busca cliente por CPF")
@@ -84,12 +59,10 @@ public class ClientesController {
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<ClienteResponse> findByCpf(
+    ResponseEntity<ClienteResponse> findByCpf(
             @Parameter(description = "CPF do cliente", example = "12345678900", required = true)
             @PathVariable("cpf") String cpf
-    ) {
-        return ResponseEntity.ok(ClienteResponse.from(clientesService.findByCpf(cpf)));
-    }
+    );
 
     @GetMapping("/email/{email}")
     @Operation(summary = "Busca cliente por e-mail")
@@ -99,12 +72,10 @@ public class ClientesController {
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<ClienteResponse> findByEmail(
+    ResponseEntity<ClienteResponse> findByEmail(
             @Parameter(description = "E-mail do cliente", example = "ana.silva@example.com", required = true)
             @PathVariable("email") String email
-    ) {
-        return ResponseEntity.ok(ClienteResponse.from(clientesService.findByEmail(email)));
-    }
+    );
 
     @PostMapping
     @Operation(summary = "Cria um cliente")
@@ -114,17 +85,10 @@ public class ClientesController {
             @ApiResponse(responseCode = "409", description = "CPF ou e-mail já cadastrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<ClienteResponse> create(
+    ResponseEntity<ClienteResponse> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dados do cliente", required = true)
             @Valid @RequestBody ClienteRequest request
-    ) {
-        Clientes saved = clientesService.save(request.toModel());
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.id())
-                .toUri();
-        return ResponseEntity.created(location).body(ClienteResponse.from(saved));
-    }
+    );
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um cliente")
@@ -135,14 +99,12 @@ public class ClientesController {
             @ApiResponse(responseCode = "409", description = "CPF ou e-mail já cadastrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<ClienteResponse> update(
+    ResponseEntity<ClienteResponse> update(
             @Parameter(description = "Identificador do cliente", example = "65f1a2b3c4d5e6f789012345", required = true)
             @PathVariable("id") String id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Novos dados do cliente", required = true)
             @Valid @RequestBody ClienteRequest request
-    ) {
-        return ResponseEntity.ok(ClienteResponse.from(clientesService.update(id, request.toModel())));
-    }
+    );
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Exclui um cliente")
@@ -152,11 +114,8 @@ public class ClientesController {
             @ApiResponse(responseCode = "404", description = "Cliente não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<Void> delete(
+    ResponseEntity<Void> delete(
             @Parameter(description = "Identificador do cliente", example = "65f1a2b3c4d5e6f789012345", required = true)
             @PathVariable("id") String id
-    ) {
-        clientesService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+    );
 }

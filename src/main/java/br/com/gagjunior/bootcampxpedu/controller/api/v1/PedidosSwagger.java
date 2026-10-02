@@ -1,10 +1,8 @@
-package br.com.gagjunior.bootcampxpedu.controller;
+package br.com.gagjunior.bootcampxpedu.controller.api.v1;
 
 import br.com.gagjunior.bootcampxpedu.dto.ApiErrorResponse;
 import br.com.gagjunior.bootcampxpedu.dto.PedidoRequest;
 import br.com.gagjunior.bootcampxpedu.dto.PedidoResponse;
-import br.com.gagjunior.bootcampxpedu.model.Pedidos;
-import br.com.gagjunior.bootcampxpedu.service.PedidosService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -16,22 +14,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.net.URI;
 import java.util.List;
 
-@RestController
 @RequestMapping("/api/v1/pedidos")
 @Tag(name = "Pedidos", description = "Operações de cadastro e consulta de pedidos.")
-public class PedidosController {
-
-    private final PedidosService pedidosService;
-
-    public PedidosController(PedidosService pedidosService) {
-        this.pedidosService = pedidosService;
-    }
+public interface PedidosSwagger {
 
     @GetMapping
     @Operation(summary = "Lista pedidos", description = "Lista todos os pedidos ou consulta por cliente ou status. Apenas um filtro pode ser informado por vez.")
@@ -40,29 +36,12 @@ public class PedidosController {
             @ApiResponse(responseCode = "400", description = "Filtros inválidos", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<List<PedidoResponse>> findAll(
+    ResponseEntity<List<PedidoResponse>> findAll(
             @Parameter(description = "Identificador do cliente para filtrar pedidos", example = "65f1a2b3c4d5e6f789012345")
             @RequestParam(value = "clienteId", required = false) String clienteId,
             @Parameter(description = "Status para filtrar pedidos", example = "RECEBIDO")
             @RequestParam(value = "status", required = false) String status
-    ) {
-        if (clienteId != null && status != null) {
-            throw new IllegalArgumentException("informe apenas um dos filtros: clienteId ou status");
-        }
-
-        if (clienteId != null) {
-            return ResponseEntity.ok(pedidosService.findByClienteId(clienteId).stream()
-                    .map(PedidoResponse::from)
-                    .toList());
-        }
-        if (status != null) {
-            return ResponseEntity.ok(pedidosService.findByStatus(status).stream()
-                    .map(PedidoResponse::from)
-                    .toList());
-        }
-
-        return ResponseEntity.ok(pedidosService.findAll().stream().map(PedidoResponse::from).toList());
-    }
+    );
 
     @GetMapping("/{id}")
     @Operation(summary = "Busca pedido por ID")
@@ -72,12 +51,10 @@ public class PedidosController {
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<PedidoResponse> findById(
+    ResponseEntity<PedidoResponse> findById(
             @Parameter(description = "Identificador do pedido", example = "65f1a2b3c4d5e6f789012347", required = true)
             @PathVariable("id") String id
-    ) {
-        return ResponseEntity.ok(PedidoResponse.from(pedidosService.findById(id)));
-    }
+    );
 
     @GetMapping("/cliente/{clienteId}")
     @Operation(summary = "Lista pedidos de um cliente")
@@ -86,14 +63,10 @@ public class PedidosController {
             @ApiResponse(responseCode = "400", description = "ID do cliente inválido", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<List<PedidoResponse>> findByClienteId(
+    ResponseEntity<List<PedidoResponse>> findByClienteId(
             @Parameter(description = "Identificador do cliente", example = "65f1a2b3c4d5e6f789012345", required = true)
             @PathVariable("clienteId") String clienteId
-    ) {
-        return ResponseEntity.ok(pedidosService.findByClienteId(clienteId).stream()
-                .map(PedidoResponse::from)
-                .toList());
-    }
+    );
 
     @GetMapping("/status/{status}")
     @Operation(summary = "Lista pedidos por status")
@@ -102,14 +75,10 @@ public class PedidosController {
             @ApiResponse(responseCode = "400", description = "Status inválido", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<List<PedidoResponse>> findByStatus(
+    ResponseEntity<List<PedidoResponse>> findByStatus(
             @Parameter(description = "Status do pedido", example = "RECEBIDO", required = true)
             @PathVariable("status") String status
-    ) {
-        return ResponseEntity.ok(pedidosService.findByStatus(status).stream()
-                .map(PedidoResponse::from)
-                .toList());
-    }
+    );
 
     @PostMapping
     @Operation(summary = "Cria um pedido")
@@ -119,17 +88,10 @@ public class PedidosController {
             @ApiResponse(responseCode = "404", description = "Cliente ou produto referenciado não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<PedidoResponse> create(
+    ResponseEntity<PedidoResponse> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dados do pedido", required = true)
             @Valid @RequestBody PedidoRequest request
-    ) {
-        Pedidos saved = pedidosService.save(request.toModel());
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(saved.id())
-                .toUri();
-        return ResponseEntity.created(location).body(PedidoResponse.from(saved));
-    }
+    );
 
     @PutMapping("/{id}")
     @Operation(summary = "Atualiza um pedido")
@@ -139,14 +101,12 @@ public class PedidosController {
             @ApiResponse(responseCode = "404", description = "Pedido, cliente ou produto não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<PedidoResponse> update(
+    ResponseEntity<PedidoResponse> update(
             @Parameter(description = "Identificador do pedido", example = "65f1a2b3c4d5e6f789012347", required = true)
             @PathVariable("id") String id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Novos dados do pedido", required = true)
             @Valid @RequestBody PedidoRequest request
-    ) {
-        return ResponseEntity.ok(PedidoResponse.from(pedidosService.update(id, request.toModel())));
-    }
+    );
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Exclui um pedido")
@@ -156,11 +116,8 @@ public class PedidosController {
             @ApiResponse(responseCode = "404", description = "Pedido não encontrado", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
             @ApiResponse(responseCode = "500", description = "Erro interno", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
-    public ResponseEntity<Void> delete(
+    ResponseEntity<Void> delete(
             @Parameter(description = "Identificador do pedido", example = "65f1a2b3c4d5e6f789012347", required = true)
             @PathVariable("id") String id
-    ) {
-        pedidosService.deleteById(id);
-        return ResponseEntity.noContent().build();
-    }
+    );
 }
