@@ -128,7 +128,7 @@ class ClientesControllerTest {
 
     @Test
     void shouldCreateClientAndReturnLocation() {
-        MockHttpServletRequest request = request("/api/v1/clientes");
+        MockHttpServletRequest request = request();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         ClienteRequest clienteRequest = new ClienteRequest(" Ana Silva ", "12345678900", "ana@example.com");
         Clientes saved = client("client-1", "Ana Silva", "12345678900", "ana@example.com");
@@ -169,12 +169,12 @@ class ClientesControllerTest {
         return new Clientes(id, name, cpf, email);
     }
 
-    private static MockHttpServletRequest request(String uri) {
+    private static MockHttpServletRequest request() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setScheme("http");
         request.setServerName("localhost");
         request.setServerPort(8080);
-        request.setRequestURI(uri);
+        request.setRequestURI("/api/v1/clientes");
         return request;
     }
 }

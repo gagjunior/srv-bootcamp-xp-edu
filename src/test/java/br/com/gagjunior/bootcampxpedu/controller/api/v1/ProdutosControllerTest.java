@@ -91,7 +91,7 @@ class ProdutosControllerTest {
 
     @Test
     void shouldCreateProductAndReturnLocation() {
-        MockHttpServletRequest request = request("/api/v1/produtos");
+        MockHttpServletRequest request = request();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         ProdutoRequest produtoRequest = new ProdutoRequest(" SKU-1 ", "Teclado", "Mecânico", 249.90);
         Produtos saved = new Produtos("product-1", "SKU-1", "Teclado", "Mecânico", 249.90);
@@ -131,12 +131,12 @@ class ProdutosControllerTest {
         return new Produtos(id, code, "Product", "Description", 10.0);
     }
 
-    private static MockHttpServletRequest request(String uri) {
+    private static MockHttpServletRequest request() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setScheme("http");
         request.setServerName("localhost");
         request.setServerPort(8080);
-        request.setRequestURI(uri);
+        request.setRequestURI("/api/v1/produtos");
         return request;
     }
 }

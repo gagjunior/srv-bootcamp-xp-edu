@@ -128,7 +128,7 @@ class PedidosControllerTest {
 
     @Test
     void shouldCreateOrderAndReturnLocation() {
-        MockHttpServletRequest request = request("/api/v1/pedidos");
+        MockHttpServletRequest request = request();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
         PedidoRequest pedidoRequest = new PedidoRequest("client-1", List.of("product-1"), 149.90, "NEW");
         Pedidos saved = order("order-1", "client-1", "NEW");
@@ -168,12 +168,12 @@ class PedidosControllerTest {
         return new Pedidos(id, clientId, List.of("product-1"), 149.90, status);
     }
 
-    private static MockHttpServletRequest request(String uri) {
+    private static MockHttpServletRequest request() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setScheme("http");
         request.setServerName("localhost");
         request.setServerPort(8080);
-        request.setRequestURI(uri);
+        request.setRequestURI("/api/v1/pedidos");
         return request;
     }
 }
